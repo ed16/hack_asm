@@ -3,5 +3,5 @@ package hack_asm
 import "fmt"
 
 func main() {
-	fmt.Println("Hello world2")
+	fmt.Println("Hello world23")
 }
