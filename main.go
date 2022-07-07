@@ -15,11 +15,12 @@ func main() {
 
 	//Get filepath from CLI args
 	filepath := getFilePath()
-	fmt.Println(filepath)
+	//fmt.Println(filepath)
 
 	// Fill predefined variables
 	var_list := fillPredifinedVars()
-	freeRAM := 16
+	fmt.Println(var_list["R14"])
+	freeRAM := 15
 	// Read file, delete whitespaces and comments, fill labels to the list
 	asm_array := readAsmFile(filepath, var_list)
 
@@ -100,9 +101,8 @@ func readAsmFile(filepath string, var_list map[string]int) (asm_array []string) 
 
 	// read the file line by line using scanner
 	scanner := bufio.NewScanner(f)
-
+	n := 0
 	for scanner.Scan() {
-		var n int
 		// processing a line
 		line := strings.ReplaceAll(scanner.Text(), " ", "")
 		if len(line) == 1 {
@@ -126,7 +126,9 @@ func readAsmFile(filepath string, var_list map[string]int) (asm_array []string) 
 		if line[0:1] == "(" {
 			i = strings.Index(line, ")")
 			line = line[1:i]
-			var_list[line] = n + 1
+
+			var_list[line] = n
+			//fmt.Println(line, " ", var_list[line])
 			continue
 		}
 
@@ -161,6 +163,9 @@ func addInstruction(bin_array []string, line string, var_list map[string]int, li
 
 		addrBin := fmt.Sprintf("%b", addrDec)
 		instruction = fmt.Sprintf("%016s", addrBin)
+		if line_num == 4523 {
+			fmt.Println(line, " ", instruction)
+		}
 	} else {
 		// C_COMMAND dest=comp;jump
 
@@ -182,7 +187,7 @@ func addInstruction(bin_array []string, line string, var_list map[string]int, li
 		instruction = "111" + getCompCode(comp, line_num) + getDestCode(dest, line_num) + getJumpCode(jump, line_num)
 
 	}
-	fmt.Println(instruction)
+	//fmt.Println(instruction)
 
 	return append(bin_array, instruction)
 
@@ -193,7 +198,7 @@ func writeFile(bin_array []string, filepath string) (err error) {
 		file *os.File
 	)
 
-	filepath = filepath[:len(filepath)-3] + "txt"
+	filepath = filepath[:len(filepath)-3] + "hack"
 
 	if file, err = os.Create(filepath); err != nil {
 		return
@@ -206,8 +211,7 @@ func writeFile(bin_array []string, filepath string) (err error) {
 		_, err := file.WriteString(strings.TrimSpace(item) + "\n")
 
 		if err != nil {
-			fmt.Println(err)
-			break
+			log.Fatal(err)
 		}
 	}
 
