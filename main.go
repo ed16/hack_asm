@@ -19,18 +19,25 @@ func main() {
 
 	// Fill predefined variables
 	var_list := fillPredifinedVars()
-	fmt.Println(var_list["R14"])
-	freeRAM := 15
+	//fmt.Println(var_list["R14"])
+	freeRAM := 16
 	// Read file, delete whitespaces and comments, fill labels to the list
 	asm_array := readAsmFile(filepath, var_list)
-
+	var addrDec int
 	for line_num, line := range asm_array {
 		// Assign address to var if it appears for the first time
 		if line[0:1] == "@" {
-			if _, ok := var_list[line[1:]]; !ok {
-				var_list[line[1:]] = freeRAM
-				freeRAM++
+			if val, err := strconv.Atoi(line[1:]); err == nil {
+				addrDec = val
+			} else {
+				if _, ok := var_list[line[1:]]; !ok {
+					var_list[line[1:]] = freeRAM
+					//fmt.Println(line[1:], " ", freeRAM)
+					freeRAM++
+				}
+				addrDec = int(var_list[line[1:]])
 			}
+			line = "@" + fmt.Sprint(addrDec)
 		}
 		bin_array = addInstruction(bin_array, line, var_list, line_num)
 	}
@@ -163,9 +170,6 @@ func addInstruction(bin_array []string, line string, var_list map[string]int, li
 
 		addrBin := fmt.Sprintf("%b", addrDec)
 		instruction = fmt.Sprintf("%016s", addrBin)
-		if line_num == 4523 {
-			fmt.Println(line, " ", instruction)
-		}
 	} else {
 		// C_COMMAND dest=comp;jump
 
